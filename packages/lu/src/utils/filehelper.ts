@@ -9,6 +9,8 @@ const path = require('path')
 const helpers = require('./../parser/utils/helpers')
 const luObject = require('./../parser/lu/lu')
 
+const configPrefix = 'luis__'
+
 /* tslint:disable:prefer-for-of no-unused*/
 
 export async function getLuObjects(stdin: string, input: string | undefined, recurse = false, extType: string | undefined) {
@@ -169,6 +171,30 @@ export function parseJSON(input: string, appType: string) {
   } catch (error) {
     throw new CLIError(`Sorry, error parsing content as ${appType} JSON`)
   }
+}
+
+export async function processInputs(flags: any, flagLabels: string[], configDir: string) {
+  let configObj: any
+  if (fs.existsSync(path.join(configDir, 'config.json'))) {
+    configObj = await fs.readJSON(path.join(configDir, 'config.json'), { throws: false })
+  }
+
+  let config: any
+  if (configObj) {
+    const allowedConfigValues = [`${configPrefix}authoringKey`]
+    config = Object.keys(configObj)
+      .filter(key => allowedConfigValues.includes(key))
+      .reduce((filteredConfigObj: any, key) => {
+        filteredConfigObj[key] = configObj[key]
+        return filteredConfigObj
+      }, {})
+  }
+
+  flagLabels
+    .filter(flag => flag !== 'help')
+    .map((flag: string) => {
+      flags[flag] = flags[flag] || (config ? config[configPrefix + flag] : null)
+    })
 }
 
 export function getCultureFromPath(file: string): string | null {

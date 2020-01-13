@@ -26,7 +26,7 @@ export default class LuisBuild extends Command {
   static flags: any = {
     help: flags.help({char: 'h'}),
     in: flags.string({char: 'i', description: 'Lu file or folder'}),
-    authoringKey: flags.string({description: 'LUIS authoring key', required: true}),
+    authoringKey: flags.string({description: 'LUIS authoring key'}),
     botName: flags.string({description: 'Bot name', required: true}),
     out: flags.string({description: 'Output location'}),
     culture: flags.string({description: 'Culture code for the content. Infer from .lu if available. Defaults to en-us'}),
@@ -38,12 +38,19 @@ export default class LuisBuild extends Command {
   }
 
   async run() {
-    const {flags} = this.parse(LuisBuild)
+    let {flags} = this.parse(LuisBuild)
+    const flagLabels = Object.keys(LuisBuild.flags)
+    const configDir = this.config.configDir
+    await fileHelper.processInputs(flags, flagLabels, configDir)
 
     // Check stdin or in parameter
     const stdin = await this.readStdin()
     if (!stdin && !flags.in) {
       throw new CLIError('Missing input. Please use stdin or pass a file or folder location with --in flag')
+    }
+
+    if (!flags.authoringKey) {
+      throw new CLIError('Missing anthoring key. Please provide authoring key with --authoringKey flag')
     }
 
     flags.culture = flags.culture && flags.culture !== '' ? flags.culture : 'en-us'

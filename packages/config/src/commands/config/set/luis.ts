@@ -12,6 +12,7 @@ export default class ConfigSetLuis extends Command {
 
   static examples = [`
     $ bf config:set:luis --appId {APPLICATION_ID} --subscriptionKey {SUBSCRIPTION_KEY} --versionId {VERSION_ID} --region {REGION}
+    $ bf config:set:luis --authoringKey {AUTHORING_KEY}
   `]
 
   static flags: any = {
@@ -20,6 +21,7 @@ export default class ConfigSetLuis extends Command {
     appId: flags.string({description: 'LUIS application Id'}),
     versionId: flags.string({description: 'LUIS version Id'}),
     endpoint: flags.string({description: 'LUIS application endpoint hostname, ex: <region>.api.cognitive.microsoft.com'}),
+    authoringKey: flags.string({description: 'LUIS cognitive services authoring key'})
   }
 
   async run() {
